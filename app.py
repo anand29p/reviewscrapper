@@ -3,6 +3,7 @@ from flask_cors import CORS,cross_origin
 import requests
 from bs4 import BeautifulSoup as bs
 from urllib.request import urlopen as uReq
+import csv
 
 app = Flask(__name__)
 
@@ -33,9 +34,9 @@ def index():
             commentboxes = prod_html.find_all('div', {'class': "_16PBlm"})
 
             filename = searchString + ".csv"
-            fw = open(filename, "w")
-            headers = "Product, Customer Name, Rating, Heading, Comment \n"
-            fw.write(headers)
+            #fw = open(filename, "w")
+            #headers = "Product, Customer Name, Rating, Heading, Comment \n"
+            #fw.write(headers)
             reviews = []
             for commentbox in commentboxes:
                 try:
@@ -66,9 +67,17 @@ def index():
                 except Exception as e:
                     print("Exception while creating dictionary: ",e)
 
-                mydict = {"Product": searchString, "Name": name, "Rating": rating, "CommentHead": commentHead,
-                          "Comment": custComment}
+                mydict = {"Product": searchString, "Name": name, "Rating": rating, "Comments Heading": commentHead,
+                          "Comments": custComment}
                 reviews.append(mydict)
+            print("Anand pandey", len(reviews))
+            print(reviews)
+            keys = reviews[0].keys()
+            print(keys)
+            with open(filename, 'w', encoding='utf8', newline='') as output_file:
+                fc = csv.DictWriter(output_file, fieldnames=reviews[0].keys())
+                fc.writeheader()
+                fc.writerows(reviews)
             return render_template('results.html', reviews=reviews[0:(len(reviews)-1)])
         except Exception as e:
             print('The Exception message is: ',e)
